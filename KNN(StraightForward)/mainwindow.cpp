@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    knn = new GLANN(512,1,this);
+    knn = new GLANN(128,3,this);
 
     ui->verticalLayout->addWidget(knn);
 }

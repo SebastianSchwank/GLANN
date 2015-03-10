@@ -49,6 +49,7 @@ protected:
     void timerEvent(QTimerEvent *);
 
 private:
+    static float fract (float f);
 
     void render();
     void copyImageSection(QPoint to, QImage* Dest, QImage Source);

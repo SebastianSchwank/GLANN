@@ -13,12 +13,14 @@ uniform sampler2D ActivationLayer;
 uniform int size;
 uniform int numLayers;
 
-const float learningRate = 0.656;
+const float learningRate = 0.789;
 
 const float pi = 3.14159265359;
 
 uniform int currLayer;
 uniform int shaderMode;
+
+const float steepness = 0.01;
 
 vec4 pack( float v ) {
   vec4 enc = vec4(1.0, 255.0, 65025.0, 160581375.0) * v;
@@ -36,7 +38,7 @@ vec4 texelFetch(sampler2D tex,const highp vec2 coord, const highp vec2 size){
 }
 //sigmoide activation function
 float sigmoid(float x){
-    return (1.0 / (1.0+exp(-x)));
+    return (1.0 / (1.0+exp(-x*steepness)));
 }
 //Map from 0..1 to -1..1 and unmap back
 highp float map(highp float val){
@@ -62,7 +64,7 @@ void main()
 
         if(shaderMode == 2){
             //Performence lag here !
-            float errorOut = map(unpack(texture2D(WeightsLayer,vec2(v_texcoord.x,float(size)/(2.0*(float(size)+1.0))))));
+            float errorOut = map(unpack(texture2D(WeightsLayer,vec2(v_texcoord.x,(2.0*float(size+1)+1.0)/(2.0*(float(size)+1.0))))));
             float outPrevLayer = unpack(texture2D(ActivationLayer,vec2(v_texcoord.x,-1.0/(2.0*(float(size)+1.0)))));
             //float inputActivation = unpack(texture2D(ActivationLayer,vec2(v_texcoord.x,-1.0/(2.0*(float(size)+1.0)))));
 
@@ -80,7 +82,7 @@ void main()
             float inputN = unpack(texture2D(ActivationLayer,vec2(v_texcoord.x,-1.0/(2.0*(float(size)+1.0)))));
             float errorTerm = map(unpack(texture2D(WeightsLayer,vec2(v_texcoord.y*(float(size)/float(size+1)),(2.0*float(size+1) + 1.0)/(2.0*(float(size)+1.0))))));
 
-            imagePixel = pack(clip(unmap(weight + errorTerm * inputN * learningRate)));
+            imagePixel = pack(clip(unmap(weight + errorTerm * learningRate * inputN)));
             //imagePixel = pack(unmap(errorTerm));
             //imagePixel = texelFetch(WeightsLayer,vec2(v_texcoord.x * size, v_texcoord.y * (size+1)),vec2(size,size+1));
         }

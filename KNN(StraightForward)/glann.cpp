@@ -67,7 +67,7 @@ void GLANN::timerEvent(QTimerEvent *)
 
 bool GLANN::initFbo(){
     QOpenGLFramebufferObjectFormat fmt;
-    fmt.setSamples(1); // or 4 or disable this line
+    fmt.setSamples(3); // or 4 or disable this line
     fmt.setInternalTextureFormat(GL_RGBA8);
     fbo = new QOpenGLFramebufferObject(size, size+1, fmt);
     return true;
@@ -77,14 +77,14 @@ void GLANN::paintGL(){
 
     QVector<float> input;
     float inVal = 1.0f*qrand()/RAND_MAX;
-    for(int i = 0; i < size-1; i++) input.append((1.0+sin( frameStepF + 2.0 * 3.145 * 1.0f * i/(size-1)))/2.0);
+    for(int i = 0; i < size-1; i++) input.append((1.0+sin( frameStepF + 2.0 * 3.145 * 1.0f * 4.0*i/(size-1)))/4.0+0.25);
     //for(int i = 0; i < size-1; i++) input.append(inVal);
     QVector<float> out = propagateForward(input);
 
     QVector<float> target = input;
 
-    qDebug() << "Out: " << out;
-    qDebug() << "Target: " << target;
+    //qDebug() << "Out: " << out;
+    //qDebug() << "Target: " << target;
 
     //render();
     //Calc target(=input) - output ERROR SIGNAL
@@ -93,10 +93,11 @@ void GLANN::paintGL(){
     qDebug() << "Error: " << input;
 
     errorBackProagation(input);
+    qDebug() << "Out: " << out;
 
     render();
 
-    frameStepF += 0.0;
+    frameStepF += 0.4;
 
 }
 
@@ -168,7 +169,7 @@ void GLANN::errorBackProagation(QVector<float> error){
         //To copy the sum activation into the Network Activation "Buffer"
         QImage layerCorrNetwWeights = fbo->toImage();
 
-/*
+
         //Set program to fbo render mode to
         //Propagate error backwards through the Layer
         program.setUniformValue("shaderMode",2);
@@ -201,16 +202,15 @@ void GLANN::errorBackProagation(QVector<float> error){
         //Delete Network's Activation Buffer
         glDeleteTextures(1,&pixelsNetworkWeights);
 
-*/
+
         //Now copy corrected Weights
         QPoint destPos1 = QPoint(0, layer*(size+1)+1);
         copyImageSection(destPos1,NetworkWeights,layerCorrNetwWeights);
-/*
 
         //After that merge Image to Activation Buffer
         QPoint destPos2 = QPoint(0, layer*(size+1));
         copyImageOutput(destPos2,NetworkWeights,layerNetwErrorProp);
-*/
+
 
     }
 
@@ -254,6 +254,7 @@ QVector<float> GLANN::propagateForward(QVector<float> input){
             //Bind Textures and set Bias to 1.0
             layerNetwActivation.setPixel(size-1,0,(unsigned int)4294967295);
             copyImageOutput(QPoint(0,layer*(size+1)),NetworkActivation,layerNetwActivation);
+            layerNetwActivation = NetworkActivation->copy(0,layer*(size+1),size,size+1);
             pixelsNetworkActivation = QGLWidget::bindTexture(layerNetwActivation);
 
             // Tell OpenGL which VBOs to use
@@ -354,23 +355,41 @@ float GLANN::unpack(QColor pixelColor){
     float g = pixelColor.greenF();
     float b = pixelColor.blueF();
     float a = pixelColor.alphaF();
-    float scaled = (float)(    (255.0/256.0)*r );
-                             //+ (255.0/256.0)*g/(256.0) );
-                             //+ (255.0/256.0)*b/(256.0*256.0)
-                             //+ (255.0/256.0)*a/(256.0*256.0*256.0));
+    float scaled = (float)(    r
+                             + g*(1.0f / 255.0f)
+                             + b*(1.0f / 65025.0f)
+                             + a*(1.0f / 160581375.0f));
     return scaled;
 }
 
-QColor GLANN::pack(float value){
-
-    QColor pixelColor = QColor(0,0,0,0);
-    //pixelColor.setAlphaF(value*(255.0/256.0));
-    //pixelColor.setBlueF(value*(255.0/256.0));
-    //pixelColor.setGreenF(value*(255.0/256.0)*(1/256.0));
-    pixelColor.setRedF(value*(255.0/256.0));
-    return pixelColor;
+// C++ offers `modf (...)`, which does the same thing, but this is simpler.
+float GLANN::fract (float f) {
+  return f-(long)f;
 }
 
+QColor GLANN::pack (float v) {
+  float enc[4];
+  enc [0] = fract (1.0f         * v);
+  enc [1] = fract (255.0f       * v);
+  enc [2] = fract (65025.0f     * v);
+  enc [3] = fract (160581375.0f * v);
+
+  enc [0] -= enc [1] * 1.0f/255.0f;
+  enc [1] -= enc [2] * 1.0f/255.0f;
+  enc [2] -= enc [3] * 1.0f/255.0f;
+
+  if(enc[0] < 0.0){
+      enc[0] = 0.0;
+  }
+
+  QColor resCol;
+  resCol.setRedF(enc[0]);
+  resCol.setGreenF(enc[1]);
+  resCol.setBlueF(enc[2]);
+  resCol.setAlphaF(enc[3]);
+
+  return resCol;
+}
 
 void GLANN::render(){
 
@@ -470,8 +489,8 @@ void GLANN::initTextures(){
     }
 
     // Poor filtering.
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     //Texture Clamping
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
