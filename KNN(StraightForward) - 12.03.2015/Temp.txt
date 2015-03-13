@@ -1,0 +1,39 @@
+
+    /*
+    if(mode == 1){
+        if(Coord.x <= 1){
+            vec4 sum = vec4(0,0,0,0);
+            for(int x = 0; x < imageSize; x++){
+                vec4 inputActivation = texture2D(IO,ivec2(Coord.y,propCycle));
+                vec4 weight = texture2D(texture,ivec2(x,Coord.y));
+                sum = sum + weight * inputActivation;
+                //currTexel = weight;
+            }
+            currTexel = (1.0/(1.0 + exp(-2.0 * sum))); // ACTIVATION FUNCTION
+        }
+
+        if(Coord.x > imageSize){
+            vec4 sum = vec4(0.0f,0.0f,0.0f,0.0f);
+
+                currTexel = texture2D(IO,vec2(gl_TexCoord[0].st.x-0.5,gl_TexCoord[0].st.y));
+                //vec4 inputActivation = texture2D(IO,vec2(gl_TexCoord[0].st.x-0.5,0));
+                //sum = sum + weight * inputActivation;
+
+            //vec4 sigmoid = (1.0/(1.0 + exp(-2.0 * sum))); // ACTIVATION FUNCTION
+            //weight = sigmoid;
+        }
+    }
+
+    if(mode == 0){
+
+        if(Coord.x > imageSize){
+                currTexel = ivec4(255,0,0,255);
+                //vec4 inputActivation = texture2D(IO,vec2(gl_TexCoord[0].st.x-0.5,0));
+                //sum = sum + weight * inputActivation;
+
+            //vec4 sigmoid = (1.0/(1.0 + exp(-2.0 * sum))); // ACTIVATION FUNCTION
+            //weight = sigmoid;
+        }
+
+    }
+*/

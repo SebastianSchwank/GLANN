@@ -9,20 +9,12 @@ GLANN::GLANN(unsigned int size, unsigned int numLayers,
 
     //qDebug() << width << height << "------------------ WIDTH , HEIGHT";
 
-    setFixedWidth(size*2);
+    setFixedWidth(size*2+1);
     setFixedHeight(size*numLayers+numLayers+1);
     this->size = size;
     this->numLayers = numLayers;
 
     qsrand((uint)QTime::currentTime().msec());
-}
-
-void GLANN::setLearningrate(float value){
-    program.setUniformValue("learningRate",value);
-}
-
-void GLANN::setSteepness(float value){
-    program.setUniformValue("steepness",value);
 }
 
 void GLANN::initializeGL(){
@@ -63,18 +55,8 @@ void GLANN::initializeGL(){
     //Init the Framebuffer
     initFbo();
 
-    //Set default Values
-    program.setUniformValue("steepness",((float)0.1));
-    program.setUniformValue("learningRate",((float)0.123));
-}
-
-void GLANN::setRenderEnablet(bool enable){
-    if(!enable){
-        // Use QBasicTimer because its faster than QTimer
-        timer.stop();
-    }else{
-        timer.start(0,this);
-    }
+    // Use QBasicTimer because its faster than QTimer
+    timer.start(0, this);
 }
 
 void GLANN::timerEvent(QTimerEvent *)
@@ -92,7 +74,49 @@ bool GLANN::initFbo(){
 }
 
 void GLANN::paintGL(){
+
+    QVector<float> input;
+    float inVal = 1.0f*qrand()/RAND_MAX;
+    //for(int i = 0; i < size-1; i++)
+    //    input.append((1.0+sin( frameStep/7.0 * 2 * 3.145 + 2.0 * 3.145 * 1.0f * 4.0*i/(size-1)))/4.0+0.25);
+    for(int i = 0; i < size-1; i++)
+        input.append((1.0+sin( frameStep/50.0 * 2 * 3.145 + 2.0 * 3.145 * 1.0f * 4.0*i/(size-1)))/2.0);
+    //for(int i = 0; i < size-1; i++) input.append(inVal);
+    QVector<float> out = propagateForward(input);
+
+    //targe = inverted sine
+    QVector<float> target;
+    for(int i = 0; i < size-1; i++)
+        target.append((1.0-sin( frameStep/50.0 * 2 * 3.145 + 2.0 * 3.145 * 1.0f * 4.0*i/(size-1)))/2.0);
+
+    //qDebug() << "Out: " << out;
+    //qDebug() << "Target: " << target;
+
+    //render();
+    //Calc target(=input) - output ERROR SIGNAL
+    float erroQuad = 0.0;
+    for(int i = 0; i < size-1; i++) {
+        input[i] = (target[i] - out[i]) * out[i] * (1.0f - out[i]);
+        erroQuad += (target[i]-out[i])*(target[i]-out[i]);
+    }
+
+    program.setUniformValue("learningRate",(float)0.123);
+
+    //qDebug() << "Glob.Error: " << erroQuad;
+
+    errorBackProagation(input);
+    //qDebug() << "Out: " << out;
+
     render();
+
+    frameStep += 4;
+    periodicAccError += erroQuad;
+
+    if(frameStep % 50 == 0 ){
+        qDebug() << "Glob.QuadPeriodicMidError: " << periodicAccError/10.0;
+        periodicAccError = 0.0;
+    }
+
 }
 
 void GLANN::errorBackProagation(QVector<float> error){

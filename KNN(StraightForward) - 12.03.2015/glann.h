@@ -39,25 +39,19 @@ public:
     QVector<float> propagateForward(QVector<float> input);
     void errorBackProagation(QVector<float> error);
 
-    void setLearningrate(float value);
-    void setSteepness(float value);
-    void setRenderEnablet(bool enable);
-
-protected:
-
-    void timerEvent(QTimerEvent *);
-    void initializeGL();
-    void paintGL();
-
-private:
-
-    void render();
-
-    static float fract (float f);
-
     static float unpack(QColor pixelColor);
     static QColor pack(float value);
 
+protected:
+
+    void initializeGL();
+    void paintGL();
+    void timerEvent(QTimerEvent *);
+
+private:
+    static float fract (float f);
+
+    void render();
     void copyImageSection(QPoint to, QImage* Dest, QImage Source);
     void copyImageOutput(QPoint to, QImage* Dest, QImage Source);
 

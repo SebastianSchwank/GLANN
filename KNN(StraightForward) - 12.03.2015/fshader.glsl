@@ -14,12 +14,13 @@ uniform int size;
 uniform int numLayers;
 
 uniform float learningRate;
-uniform float steepness;
 
 const float pi = 3.14159265359;
 
 uniform int currLayer;
 uniform int shaderMode;
+
+const float steepness = 0.1;
 
 vec4 pack( float v ) {
   vec4 enc = vec4(1.0, 255.0, 65025.0, 160581375.0) * v;
