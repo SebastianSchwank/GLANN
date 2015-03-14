@@ -1,8 +1,8 @@
 # GLANN
 A Artificial Neural Network running on GPU(GLSL) written in C++ in the Framework Qt
 
-- The current IO is hardcoded in the void GLANN::paintGL() routine and just (tries to) map a sine function onto itself.
+- The current IO is hardcoded in the void GLANN::paintGL() routine and just (tries to) modulate a sine function depending on the activated Input Neuron.
 
-- Currentliy just 1/ONE Layer is supported and I get silly stripes while rendering the weights.
+- ATM. the values are between [0..1( and [-1..1(.
 
-- ATM. only the red image channel is used for calculations so the stepsize between 0..1 and -1..1 is very limeted.
+- note that the programm hard exits if you input values over [0..1( for the input and [-1..1( for the error.
