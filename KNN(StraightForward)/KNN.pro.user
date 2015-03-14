@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 3.2.0, 2015-03-14T15:28:06. -->
+<!-- Written by QtCreator 3.2.0, 2015-03-14T19:52:20. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -252,8 +252,8 @@
      <value type="int">14</value>
     </valuelist>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Run on Android device</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.AndroidRunConfiguration:C:/Users/Sebastian/Desktop/KlangbilderRT/KNN(StraightForward)/KNN.pro</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Run on Android device2</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.AndroidRunConfiguration:C:/Users/Sebastian/Documents/GitHub/GLANN/KNN(StraightForward)/KNN.pro</value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.ProFile">KNN.pro</value>
     <value type="uint" key="RunConfiguration.QmlDebugServerPort">3768</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>

@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     mSize = 256;
     mLayers = 2;
+    renderEnablet = true;
 
     knn = new GLANN(mSize,mLayers,this);
 
@@ -28,6 +29,9 @@ MainWindow::MainWindow(QWidget *parent) :
     targetPlot = new QGraphicsScene(this);
     ui->graphicsView_target->setScene(targetPlot);
 
+    netView = new QGraphicsScene(this);
+    ui->graphicsView_net->setScene(netView);
+
     mFrameCounter = 0;
 }
 
@@ -46,14 +50,14 @@ void MainWindow::timerEvent(QTimerEvent *)
     //    input.append((1.0+sin( frameStep/7.0 * 2 * 3.145 + 2.0 * 3.145 * 1.0f * 4.0*i/(size-1)))/4.0+0.25);
     for(int i = 0; i < mSize-1; i++)
         input.append(0.0);
-    input[mFrameCounter%160+mSize/5] = 0.9999;
+    input[(mFrameCounter%160)+mSize/5] = 0.9999;
     //for(int i = 0; i < size-1; i++) input.append(inVal);
     QVector<float> out = knn->propagateForward(input);
 
     //targe = inverted sine
     QVector<float> target;
     for(int i = 0; i < mSize-1; i++)
-        target.append((1.0+sin( 2.0 * 3.145 * (1.0f * (mFrameCounter % 160))/20 * i/(mSize-1)))/2.0);
+        target.append((1.0+sin( 2.0 * 3.145 * (1.0f * (mFrameCounter % 160))/10 * i/(mSize-1)))/2.0);
 
     //qDebug() << "Out: " << out;
     //qDebug() << "Target: " << target;
@@ -97,6 +101,8 @@ void MainWindow::timerEvent(QTimerEvent *)
         lastError = accError;
         accError = 0;
     }
+
+    netView->addPixmap(QPixmap::fromImage(knn->render()));
 
 }
 

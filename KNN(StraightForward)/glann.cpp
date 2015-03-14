@@ -6,8 +6,8 @@ GLANN::GLANN(unsigned int layerSize, unsigned int numLayers,
       QWidget *parent, QImage *NetworkWeights, QGLWidget *shareWidget)
     : QGLWidget(parent, shareWidget)
 {
-    setFixedWidth(layerSize*2);
-    setFixedHeight(layerSize*numLayers+numLayers+1);
+    setFixedWidth(1);
+    setFixedHeight(1);
     this->size = layerSize;
     this->numLayers = numLayers;
 
@@ -94,9 +94,10 @@ void GLANN::timerEvent(QTimerEvent *)
 
 bool GLANN::initFbo(){
     QOpenGLFramebufferObjectFormat fmt;
-    fmt.setSamples(1); // or 4 or disable this line
-    fmt.setInternalTextureFormat(GL_RGBA8);
+    fmt.setSamples(0); // or 4 or disable this line
+    //fmt.setInternalTextureFormat(GL_RGBA8);
     fbo = new QOpenGLFramebufferObject(size, size+1, fmt);
+    renderBuffer = new QOpenGLFramebufferObject(size*2,size*numLayers+numLayers+1,fmt);
     return true;
 }
 
@@ -406,7 +407,9 @@ QColor GLANN::pack (float v) {
   return resCol;
 }
 
-void GLANN::render(){
+QImage GLANN::render(){
+
+    renderBuffer->bind();
 
      //Set Viewport back to default
      glViewport(0,0,size*2,size*numLayers+numLayers+1);
@@ -460,6 +463,9 @@ void GLANN::render(){
 
      //Delete Network's Activation Buffer
      glDeleteTextures(1,&pixelsNetworkActivation);
+    renderBuffer->release();
+
+    return renderBuffer->toImage();
 
 }
 
@@ -511,8 +517,8 @@ void GLANN::initTextures(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     //Texture Clamping
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
 }
 

@@ -40,6 +40,8 @@ public:
     QVector<float> propagateForward(QVector<float> input);
     void errorBackProagation(QVector<float> error);
 
+    QImage render();
+
     QImage getNetAsImage();
 
     void setLearningrate(float value);
@@ -53,8 +55,6 @@ protected:
     void paintGL();
 
 private:
-
-    void render();
 
     static float fract (float f);
 
@@ -84,6 +84,7 @@ private:
 
     QGLShaderProgram program;
     QOpenGLFramebufferObject *fbo;
+    QOpenGLFramebufferObject *renderBuffer;
 
     GLuint vboId0;
     GLuint vboId1;
@@ -92,6 +93,8 @@ private:
         QVector3D position;
         QVector2D texCoord;
     };
+
+    QImage currNetView;
 
 };
 

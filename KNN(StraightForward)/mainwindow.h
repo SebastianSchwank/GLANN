@@ -50,6 +50,8 @@ private:
     QGraphicsScene *inPlot;
     QGraphicsScene *targetPlot;
 
+    QGraphicsScene *netView;
+
 };
 
 #endif // MAINWINDOW_H

@@ -1,7 +1,7 @@
 #ifdef GL_ES
 // Set default precision to high
-precision mediump int;
-precision mediump float;
+precision highp int;
+precision highp float;
 #endif
 
 //RT2DShader
@@ -28,7 +28,7 @@ vec4 pack( float v ) {
   return enc;
 }
 float unpack( vec4 rgba ) {
-  return dot( rgba, vec4(1.0, 1/255.0, 1/65025.0, 1/160581375.0) );
+  return dot( rgba, vec4(1.0, 1.0/255.0, 1.0/65025.0, 1.0/160581375.0) );
 }
 //synthesizing TexelFetch
 vec4 texelFetch(sampler2D tex,const highp vec2 coord, const highp vec2 size){
@@ -56,7 +56,8 @@ float clip(float val){
 void main()
 {
     //because backpropagated error gets bigger from layer to layer adjust learningRate dep. on layer
-    float mulLearningRate = (learningRate*(currLayer+1))/(numLayers+1);
+    //float mulLearningRate = (learningRate*(currLayer+1))/(numLayers+1);
+    float mulLearningRate = learningRate;
     //Pixel Error Code (just for Debugging puposes)
     vec4 imagePixel = vec4(1.0,1.0,1.0,1.0);
 
@@ -71,8 +72,8 @@ void main()
             highp float sumPixelX = 0.0;
             //Tex offset by 1
             for(int y = -1; y < size-1; y++){
-                float weight = map(unpack(texelFetch(WeightsLayer,vec2(y,v_texcoord.x*(size+1)),vec2((size),size+1))));
-                float errorOut = map(unpack(texelFetch(WeightsLayer,vec2(y,float(size+1)),vec2(size,size+1))));
+                float weight = map(unpack(texelFetch(WeightsLayer,vec2(float(y),v_texcoord.x*float(size+1)),vec2(float(size),float(size+1)))));
+                float errorOut = map(unpack(texelFetch(WeightsLayer,vec2(float(y),float(size+1)),vec2(float(size),float(size+1)))));
                 sumPixelX = sumPixelX + errorOut * weight;
             }
             imagePixel = pack(unmap(sumPixelX*outPrevLayer*(1.0-outPrevLayer)));
