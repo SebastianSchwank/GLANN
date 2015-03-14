@@ -43,7 +43,7 @@ private:
     unsigned int mSize,mLayers;
 
     QGraphicsScene *errorGraph;
-    unsigned int mFrameCounter;
+    unsigned long int mFrameCounter;
     float lastError,accError;
 
     QGraphicsScene *outPlot;
