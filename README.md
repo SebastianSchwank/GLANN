@@ -6,3 +6,14 @@ A Artificial Neural Network running on GPU(GLSL) written in C++ in the Framework
 - ATM. the values are between [0..1( and [-1..1(.
 
 - note that the programm hard exits if you input values over [0..1( for the input and [-1..1( for the error.
+- 
+
+
+- Some Images:
+- 
+
+![alt tag](https://github.com/schwenk/GLANN/blob/master/learningToModulateASineFunction.png)
+![alt tag](https://github.com/schwenk/GLANN/blob/master/learningToModulateASineFunction1.png)
+![alt tag](https://github.com/schwenk/GLANN/blob/master/learningToModulateASineFunction2.png)
+
+
