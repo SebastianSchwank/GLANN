@@ -6,8 +6,8 @@ GLANN::GLANN(unsigned int layerSize, unsigned int numLayers,
       QWidget *parent, QImage *NetworkWeights, QGLWidget *shareWidget)
     : QGLWidget(parent, shareWidget)
 {
-    setFixedWidth(1);
-    setFixedHeight(1);
+    setFixedWidth(2);
+    setFixedHeight(2);
     this->size = layerSize;
     this->numLayers = numLayers;
 
@@ -84,12 +84,6 @@ void GLANN::setRenderEnablet(bool enable){
     }else{
         timer.start(0,this);
     }
-}
-
-void GLANN::timerEvent(QTimerEvent *)
-{
-    // Update scene
-    update();
 }
 
 bool GLANN::initFbo(){
@@ -463,6 +457,7 @@ QImage GLANN::render(){
 
      //Delete Network's Activation Buffer
      glDeleteTextures(1,&pixelsNetworkActivation);
+
     renderBuffer->release();
 
     return renderBuffer->toImage();

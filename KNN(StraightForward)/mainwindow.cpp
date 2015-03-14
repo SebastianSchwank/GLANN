@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    mSize = 256;
+    mSize = 128;
     mLayers = 2;
     renderEnablet = true;
 
@@ -33,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->graphicsView_net->setScene(netView);
 
     mFrameCounter = 0;
+    accError = 0;
 }
 
 MainWindow::~MainWindow()
@@ -50,14 +51,15 @@ void MainWindow::timerEvent(QTimerEvent *)
     //    input.append((1.0+sin( frameStep/7.0 * 2 * 3.145 + 2.0 * 3.145 * 1.0f * 4.0*i/(size-1)))/4.0+0.25);
     for(int i = 0; i < mSize-1; i++)
         input.append(0.0);
-    input[(mFrameCounter%160)+mSize/5] = 0.9999;
+    input[(mFrameCounter%160)/2+mSize/5] = 0.9999;
     //for(int i = 0; i < size-1; i++) input.append(inVal);
+
     QVector<float> out = knn->propagateForward(input);
 
     //targe = inverted sine
     QVector<float> target;
     for(int i = 0; i < mSize-1; i++)
-        target.append((1.0+sin( 2.0 * 3.145 * (1.0f * (mFrameCounter % 160))/10 * i/(mSize-1)))/2.0);
+        target.append((1.0+sin( 2.0 * 3.145 * (1.0f * (mFrameCounter % 81))/20 * i/(mSize-1)))/2.0);
 
     //qDebug() << "Out: " << out;
     //qDebug() << "Target: " << target;
@@ -86,14 +88,14 @@ void MainWindow::timerEvent(QTimerEvent *)
     }
     outPlot->clear();
     for(int i = 1; i < mSize-1; i++){
-        outPlot->addLine(i-1,-out[i-1]*scaler,i,-out[i]*scaler);
+//        outPlot->addLine(i-1,-out[i-1]*scaler,i,-out[i]*scaler);
     }
     targetPlot->clear();
     for(int i = 1; i < mSize-1; i++){
-        targetPlot->addLine(i-1,-target[i-1]*scaler,i,-target[i]*scaler);
+//        targetPlot->addLine(i-1,-target[i-1]*scaler,i,-target[i]*scaler);
     }
 
-    accError += erroQuad;
+    //accError += erroQuad;
 
     //Plot the current Glob Error
     if(mFrameCounter % 160 == 0 ){
@@ -102,7 +104,9 @@ void MainWindow::timerEvent(QTimerEvent *)
         accError = 0;
     }
 
-    netView->addPixmap(QPixmap::fromImage(knn->render()));
+    netView->clear();
+    QPixmap tmpRendered = QPixmap::fromImage(knn->render());
+    netView->addPixmap(tmpRendered);
 
 }
 

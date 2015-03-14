@@ -46,6 +46,8 @@ private:
     unsigned long int mFrameCounter;
     float lastError,accError;
 
+    QImage *currRenderedImage;
+
     QGraphicsScene *outPlot;
     QGraphicsScene *inPlot;
     QGraphicsScene *targetPlot;

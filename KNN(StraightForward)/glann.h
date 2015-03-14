@@ -50,7 +50,6 @@ public:
 
 protected:
 
-    void timerEvent(QTimerEvent *);
     void initializeGL();
     void paintGL();
 
