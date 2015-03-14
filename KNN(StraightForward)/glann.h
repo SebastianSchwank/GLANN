@@ -33,11 +33,14 @@ class GLANN : public QGLWidget,protected QGLFunctions
     Q_OBJECT
 
 public:
-    GLANN(unsigned int size, unsigned int numLayers,
-          QWidget *parent = 0, QGLWidget *shareWidget = 0);
+    GLANN(unsigned int layerSize, unsigned int numLayers,
+          QWidget *parent,
+          QImage *NetworkWeights = 0, QGLWidget *shareWidget = 0);
 
     QVector<float> propagateForward(QVector<float> input);
     void errorBackProagation(QVector<float> error);
+
+    QImage getNetAsImage();
 
     void setLearningrate(float value);
     void setSteepness(float value);
@@ -67,7 +70,8 @@ private:
 
     QBasicTimer timer;
 
-    float periodicAccError;
+    QImage loadedNetworkWeights;
+    bool loadedImageAvailable;
 
     QImage *NetworkWeights;
     QImage *NetworkActivation;
@@ -77,9 +81,6 @@ private:
 
     unsigned int numLayers;
     unsigned int size;
-
-
-    int frameStep = 0;
 
     QGLShaderProgram program;
     QOpenGLFramebufferObject *fbo;

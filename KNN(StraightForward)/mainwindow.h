@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QFileDialog>
+#include <QGraphicsScene>
 
 #include <QString>
 #include <QString>
@@ -22,9 +23,10 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_pushButton_5_clicked();
 
-    void on_pushButton_3_clicked();
+    void on_pushButton_importInputData_clicked();
+
+    void on_pushButton_StartStop_clicked();
 
 private:
     void timerEvent(QTimerEvent *);
@@ -39,8 +41,15 @@ private:
     GLANN *knn;
     bool renderEnablet;
     unsigned int mSize,mLayers;
-    unsigned int mIterationCounter;
-    float mGlobError;
+
+    QGraphicsScene *errorGraph;
+    unsigned int mFrameCounter;
+    float lastError,accError;
+
+    QGraphicsScene *outPlot;
+    QGraphicsScene *inPlot;
+    QGraphicsScene *targetPlot;
+
 };
 
 #endif // MAINWINDOW_H

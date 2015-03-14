@@ -1,18 +1,23 @@
 #include "glann.h"
 
 
-GLANN::GLANN(unsigned int size, unsigned int numLayers,
-             QWidget *parent, QGLWidget *shareWidget)
-      : QGLWidget(parent, shareWidget)
+
+GLANN::GLANN(unsigned int layerSize, unsigned int numLayers,
+      QWidget *parent, QImage *NetworkWeights, QGLWidget *shareWidget)
+    : QGLWidget(parent, shareWidget)
 {
-    QScreen *screen = QApplication::screens().at(0);
-
-    //qDebug() << width << height << "------------------ WIDTH , HEIGHT";
-
-    setFixedWidth(size*2);
-    setFixedHeight(size*numLayers+numLayers+1);
-    this->size = size;
+    setFixedWidth(layerSize*2);
+    setFixedHeight(layerSize*numLayers+numLayers+1);
+    this->size = layerSize;
     this->numLayers = numLayers;
+
+    if(NetworkWeights != 0){
+        loadedNetworkWeights = *NetworkWeights;
+        this->NetworkWeights = &loadedNetworkWeights;
+        loadedImageAvailable = true;
+    }else{
+        loadedImageAvailable = false;
+    }
 
     qsrand((uint)QTime::currentTime().msec());
 }
@@ -23,6 +28,10 @@ void GLANN::setLearningrate(float value){
 
 void GLANN::setSteepness(float value){
     program.setUniformValue("steepness",value);
+}
+
+QImage GLANN::getNetAsImage(){
+    return *NetworkWeights;
 }
 
 void GLANN::initializeGL(){
@@ -474,8 +483,11 @@ void GLANN::copyImageOutput(QPoint to, QImage* Dest, QImage Source){
 
 void GLANN::initTextures(){
 
-    //Initalize Random Weights
-    NetworkWeights = new Playground(size,size*numLayers+numLayers+1);
+    if(!loadedImageAvailable){
+        //Initalize Random Weights
+        NetworkWeights = new Playground(size,size*numLayers+numLayers+1);
+    }
+
     //Initalize NetworkActivation + NeuronActivationSum + InputLayer (+1)
     NetworkActivation = new QImage(size,size*numLayers+numLayers+1,QImage::Format_ARGB32);
     //Set Activation to Zero
