@@ -3,12 +3,16 @@
 
 #include <QMainWindow>
 #include <QFileDialog>
+
 #include <QGraphicsScene>
+#include <QImageReader>
+#include <QImageWriter>
 
 #include <QString>
-#include <QString>
+#include <QStringListModel>
 
 #include "glann.h"
+#include "waveloader.h"
 
 namespace Ui {
 class MainWindow;
@@ -28,6 +32,16 @@ private slots:
 
     void on_pushButton_StartStop_clicked();
 
+    void on_pushButton_5_clicked();
+
+    void on_pushButton_3_clicked();
+
+    void on_pushButton_importTarget_clicked();
+
+    void on_actionExport_Network_triggered();
+
+    void on_actionImport_Network_triggered();
+
 private:
     void timerEvent(QTimerEvent *);
 
@@ -35,11 +49,10 @@ private:
 
     QBasicTimer timer;
 
-    QVector<QString> InputFiles;
-    QVector<QString> TargetFiles;
+    QStringListModel InputFiles;
+    QStringListModel TargetFiles;
 
     GLANN *knn;
-    bool renderEnablet;
     unsigned int mSize,mLayers;
 
     QGraphicsScene *errorGraph;
@@ -47,6 +60,7 @@ private:
     float lastError,accError;
 
     QImage *currRenderedImage;
+    QImage netWeights;
 
     QGraphicsScene *outPlot;
     QGraphicsScene *inPlot;

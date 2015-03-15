@@ -2,8 +2,8 @@
 
 
 
-GLANN::GLANN(unsigned int layerSize, unsigned int numLayers,
-      QWidget *parent, QImage *NetworkWeights, QGLWidget *shareWidget)
+GLANN::GLANN(unsigned int layerSize, unsigned int numLayers, QImage *NetworkWeights,
+      QWidget *parent, QGLWidget *shareWidget)
     : QGLWidget(parent, shareWidget)
 {
     setFixedWidth(2);
@@ -30,8 +30,23 @@ void GLANN::setSteepness(float value){
     program.setUniformValue("steepness",value);
 }
 
+void GLANN::replaceWeights(QImage newWeights,unsigned int layerSize, unsigned int numLayers){
+    this->size = layerSize;
+    this->numLayers = numLayers;
+
+    loadedNetworkWeights = newWeights;
+    this->NetworkWeights = &loadedNetworkWeights;
+    loadedImageAvailable = true;
+
+    delete fbo;
+    delete renderBuffer;
+    initFbo();
+
+    initTextures();
+}
+
 QImage GLANN::getNetAsImage(){
-    return *NetworkWeights;
+    return NetworkWeights->convertToFormat(QImage::Format_RGB32);
 }
 
 void GLANN::initializeGL(){
@@ -75,15 +90,6 @@ void GLANN::initializeGL(){
     //Set default Values
     program.setUniformValue("steepness",((float)0.1));
     program.setUniformValue("learningRate",((float)0.123));
-}
-
-void GLANN::setRenderEnablet(bool enable){
-    if(!enable){
-        // Use QBasicTimer because its faster than QTimer
-        timer.stop();
-    }else{
-        timer.start(0,this);
-    }
 }
 
 bool GLANN::initFbo(){

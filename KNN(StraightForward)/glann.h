@@ -34,11 +34,14 @@ class GLANN : public QGLWidget,protected QGLFunctions
 
 public:
     GLANN(unsigned int layerSize, unsigned int numLayers,
-          QWidget *parent,
-          QImage *NetworkWeights = 0, QGLWidget *shareWidget = 0);
+          QImage *NetworkWeights = 0,
+          QWidget *parent = 0,
+          QGLWidget *shareWidget = 0);
 
     QVector<float> propagateForward(QVector<float> input);
     void errorBackProagation(QVector<float> error);
+
+    void replaceWeights(QImage newWeights,unsigned int layerSize, unsigned int numLayers);
 
     QImage render();
 
@@ -46,7 +49,6 @@ public:
 
     void setLearningrate(float value);
     void setSteepness(float value);
-    void setRenderEnablet(bool enable);
 
 protected:
 
