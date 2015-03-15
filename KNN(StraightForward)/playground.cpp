@@ -6,7 +6,7 @@ Playground::Playground(unsigned int width,unsigned int height)
     for(int x = 0; x < this->width(); x++){
         for(int y = 0; y < this->height(); y++){
             float randVal = (2.0f*qrand())/RAND_MAX - 1.0;
-            float cubicAproximated = ((randVal*randVal*randVal*randVal*randVal)/16.0+0.5);
+            float cubicAproximated = ((randVal*randVal*randVal*randVal*randVal)/32.0+0.5);
             QColor *color = new QColor((int)(cubicAproximated*255.0),
                                        (int)(cubicAproximated*255.0),
                                        (int)(cubicAproximated*255.0),

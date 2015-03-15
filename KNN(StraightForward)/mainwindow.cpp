@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     mSize = 128;
-    mLayers = 3;
+    mLayers = 1;
 
     knn = new GLANN(mSize,mLayers);
 
@@ -38,72 +38,93 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::doCalculations(){
+
+    mFrameCounter++;
+
+    float r = 3.0 + (mFrameCounter%100)/100.0;
+
+    float x0 = 0.5;
+    float x = x0;
+
+    //initalise input (logistic function) output should be r
+    QVector<float> input;
+    for(int i = 0; i < mSize-1; i++){
+        input.append(x);
+        x = r * x * (1-x);
+    }
+
+    QVector<float> target;
+    for(int i = 0; i < mSize-1; i++)
+        target.append(0.0);
+
+    //Target output is the bifucation of the input ("Histogramm" of the input Function)
+    for(int i = 0; i < mSize-1; i++){
+        target[(int)(input[i]*(mSize-1))] += 1;
+    }
+    //Scale it  to 0..1(
+    float maxTarget = 0.0;
+    for(int i = 0; i < mSize-1; i++){
+        if(maxTarget < target[i]) maxTarget = target[i];
+    }
+    for(int i = 0; i < mSize-1; i++){
+        target[i] = target[i]/maxTarget;
+    }
+
+
+
+    //for(int i = 0; i < size-1; i++) input.append(inVal);
+
+    QVector<float> out = knn->propagateForward(input);
+
+    //qDebug() << "Out: " << out;
+    //qDebug() << "Target: " << target;
+
+    //render();
+    //Calc target(=input) - output ERROR SIGNAL
+    float erroQuad = 0.0;
+    QVector<float> error;
+    for(int i = 0; i < mSize-1; i++) {
+        error.append((target[i] - out[i]) * out[i] * (1.0f - out[i]));
+        erroQuad += (target[i]-out[i])*(target[i]-out[i]);
+    }
+
+    //program.setUniformValue("learningRate",(float)0.123);
+
+    //qDebug() << "Glob.Error: " << erroQuad;
+
+    knn->errorBackProagation(error);
+    //qDebug() << "Out: " << out;
+
+    float scaler = 50;
+    //Plot input output & target
+    inPlot->clear();
+    for(int i = 1; i < mSize-1; i++){
+        inPlot->addLine(i-1,-input[i-1]*scaler,i,-input[i]*scaler);
+    }
+    outPlot->clear();
+    for(int i = 1; i < mSize-1; i++){
+        outPlot->addLine(i-1,-out[i-1]*scaler,i,-out[i]*scaler);
+    }
+    targetPlot->clear();
+    for(int i = 1; i < mSize-1; i++){
+        targetPlot->addLine(i-1,-target[i-1]*scaler,i,-target[i]*scaler);
+    }
+
+    accError += erroQuad;
+
+    //Plot the current Glob Error
+    if(mFrameCounter % 100 == 0 ){
+        errorGraph->addLine(mFrameCounter/100-1,-lastError,mFrameCounter/100,-accError);
+        lastError = accError;
+        accError = 0;
+    }
+
+}
+
 void MainWindow::timerEvent(QTimerEvent *)
 {
-
-
-        mFrameCounter++;
-
-        QVector<float> input;
-        float inVal1 = 1.0f*qrand()/RAND_MAX;
-        float inVal2 = 1.0f*qrand()/RAND_MAX;
-        //for(int i = 0; i < size-1; i++)
-        //    input.append((1.0+sin( frameStep/7.0 * 2 * 3.145 + 2.0 * 3.145 * 1.0f * 4.0*i/(size-1)))/4.0+0.25);
-        for(int i = 0; i < mSize-1; i++)
-            input.append(0.0);
-
-        input[(mFrameCounter%100)+mSize/8] = 0.9999;
-
-        QVector<float> target;
-        for(int i = 0; i < mSize-1; i++)
-            target.append((1.0+sin( 2.0 * 3.145 * 1.0f * (mFrameCounter%100)/10 *i/(mSize-1)))/4.0+0.25);
-
-        //for(int i = 0; i < size-1; i++) input.append(inVal);
-
-        QVector<float> out = knn->propagateForward(input);
-
-        //qDebug() << "Out: " << out;
-        //qDebug() << "Target: " << target;
-
-        //render();
-        //Calc target(=input) - output ERROR SIGNAL
-        float erroQuad = 0.0;
-        QVector<float> error;
-        for(int i = 0; i < mSize-1; i++) {
-            error.append((target[i] - out[i]) * out[i] * (1.0f - out[i]));
-            erroQuad += (target[i]-out[i])*(target[i]-out[i]);
-        }
-
-        //program.setUniformValue("learningRate",(float)0.123);
-
-        //qDebug() << "Glob.Error: " << erroQuad;
-
-        knn->errorBackProagation(error);
-        //qDebug() << "Out: " << out;
-
-        float scaler = 50;
-        //Plot input output & target
-        inPlot->clear();
-        for(int i = 1; i < mSize-1; i++){
-            inPlot->addLine(i-1,-input[i-1]*scaler,i,-input[i]*scaler);
-        }
-        outPlot->clear();
-        for(int i = 1; i < mSize-1; i++){
-            outPlot->addLine(i-1,-out[i-1]*scaler,i,-out[i]*scaler);
-        }
-        targetPlot->clear();
-        for(int i = 1; i < mSize-1; i++){
-            targetPlot->addLine(i-1,-target[i-1]*scaler,i,-target[i]*scaler);
-        }
-
-        accError += erroQuad;
-
-        //Plot the current Glob Error
-        if(mFrameCounter % 100 == 0 ){
-            errorGraph->addLine(mFrameCounter/10-1,-lastError,mFrameCounter/10,-accError);
-            lastError = accError;
-            accError = 0;
-        }
+    doCalculations();
 
     netView->clear();
     QPixmap tmpRendered = QPixmap::fromImage(knn->render());
@@ -130,8 +151,8 @@ void MainWindow::on_pushButton_importTarget_clicked()
 void MainWindow::on_pushButton_StartStop_clicked()
 {
     // ------------ !!!
-    knn->setLearningrate(0.1);
-    knn->setSteepness(0.01);
+    knn->setLearningrate(0.35);
+    knn->setSteepness(1.1);
 
     if(timer.isActive()){
         // Use QBasicTimer because its faster than QTimer

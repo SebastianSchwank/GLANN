@@ -26,6 +26,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    void doCalculations();
+
 private slots:
 
     void on_pushButton_importInputData_clicked();
