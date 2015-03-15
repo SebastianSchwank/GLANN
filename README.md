@@ -1,5 +1,4 @@
 # GLANN
-Have to fix memory Leak !
 
 
 A Artificial Neural Network running on GPU(GLSL) written in C++ in the Framework Qt
