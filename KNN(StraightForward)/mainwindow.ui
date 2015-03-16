@@ -35,8 +35,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>561</width>
-             <height>420</height>
+             <width>111</width>
+             <height>111</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -253,7 +253,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="pushButton_singleShot">
           <property name="text">
            <string>Single Shot Propagation</string>
           </property>

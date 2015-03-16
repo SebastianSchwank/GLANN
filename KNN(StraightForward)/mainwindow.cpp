@@ -7,8 +7,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    mSize = 128;
-    mLayers = 1;
+    mSize = 64;
+    mLayers = 6;
 
     knn = new GLANN(mSize,mLayers);
 
@@ -41,7 +41,7 @@ MainWindow::~MainWindow()
 void MainWindow::doCalculations(){
 
     mFrameCounter++;
-
+/*
     float r = 3.0 + (mFrameCounter%100)/100.0;
 
     float x0 = 0.5;
@@ -72,7 +72,6 @@ void MainWindow::doCalculations(){
     }
 
 
-
     //for(int i = 0; i < size-1; i++) input.append(inVal);
 
     QVector<float> out = knn->propagateForward(input);
@@ -95,6 +94,31 @@ void MainWindow::doCalculations(){
 
     knn->errorBackProagation(error);
     //qDebug() << "Out: " << out;
+*/
+    /*------------------------------------------*/
+    QVector<float> input;
+    for(int i = 0; i < mSize-1; i++){
+        input.append((1.0+sin((mFrameCounter % 50)/10.0*(i/(mSize-1.0f))*2*3.14159265359))/2.0);
+    }
+
+    QVector<float> out = knn->propagateForward(input);
+
+    QVector<float> target;
+    for(int i = 0; i < mSize-1; i++)
+        target.append(0.0);
+
+    target[(mFrameCounter % 50)+(mSize-1)/10] = 0.9999;
+
+    float erroQuad = 0.0;
+    QVector<float> error;
+    for(int i = 0; i < mSize-1; i++) {
+        error.append((target[i] - out[i]) * out[i] * (1.0f - out[i]));
+        erroQuad += (target[i]-out[i])*(target[i]-out[i]);
+    }
+
+    knn->errorBackProagation(error);
+
+    /*------------------------------------------*/
 
     float scaler = 50;
     //Plot input output & target
@@ -114,7 +138,7 @@ void MainWindow::doCalculations(){
     accError += erroQuad;
 
     //Plot the current Glob Error
-    if(mFrameCounter % 100 == 0 ){
+    if(mFrameCounter % 50 == 0 ){
         errorGraph->addLine(mFrameCounter/100-1,-lastError,mFrameCounter/100,-accError);
         lastError = accError;
         accError = 0;
@@ -210,4 +234,30 @@ void MainWindow::on_actionImport_Network_triggered()
         QPixmap tmpRendered = QPixmap::fromImage(knn->render());
         netView->addPixmap(tmpRendered);
     }
+}
+
+void MainWindow::on_pushButton_singleShot_clicked()
+{
+    QVector<float> input;
+    for(int i = 0; i < mSize-1; i++){
+        input.append(0.0);
+    }
+    input[50] = 1.0;
+    input[120] = 1.0;
+
+    QVector<float> out = knn->propagateForward(input);
+
+
+    float scaler = 50;
+    //Plot input output & target
+    inPlot->clear();
+    for(int i = 1; i < mSize-1; i++){
+        inPlot->addLine(i-1,-input[i-1]*scaler,i,-input[i]*scaler);
+    }
+    outPlot->clear();
+    for(int i = 1; i < mSize-1; i++){
+        outPlot->addLine(i-1,-out[i-1]*scaler,i,-out[i]*scaler);
+    }
+
+
 }

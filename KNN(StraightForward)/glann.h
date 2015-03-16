@@ -39,7 +39,7 @@ public:
           QGLWidget *shareWidget = 0);
 
     QVector<float> propagateForward(QVector<float> input);
-    void errorBackProagation(QVector<float> error);
+    QImage errorBackProagation(QVector<float> error);
 
     void replaceWeights(QImage newWeights,unsigned int layerSize, unsigned int numLayers);
 
