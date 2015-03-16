@@ -105,7 +105,7 @@ void GLANN::paintGL(){
     render();
 }
 
-QImage GLANN::errorBackProagation(QVector<float> error){
+void GLANN::errorBackProagation(QVector<float> error){
     //Check InpV.-Size
     if(error.size() != size-1) exit(inputVector_sizeError);
 
@@ -214,9 +214,10 @@ QImage GLANN::errorBackProagation(QVector<float> error){
         //After that merge Image to Activation Buffer
         QPoint destPos2 = QPoint(0, layer*(size+1));
         copyImageOutput(destPos2,NetworkWeights,layerNetwErrorProp);
+
+
     }
 
-    return *NetworkWeights;
 
 }
 

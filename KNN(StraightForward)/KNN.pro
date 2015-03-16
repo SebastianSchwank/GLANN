@@ -11,8 +11,7 @@ SOURCES += main.cpp \
     lineobject.cpp \
     pointlight.cpp \
     mainwindow.cpp \
-    waveloader.cpp \
-    multiglann.cpp
+    waveloader.cpp
 
 qtHaveModule(opengl) {
     QT += opengl
@@ -39,8 +38,7 @@ HEADERS += \
     pointlight.h \
     errorCodes.h \
     mainwindow.h \
-    waveloader.h \
-    multiglann.h
+    waveloader.h
 
 OTHER_FILES += \
     Temp.txt

@@ -44,8 +44,6 @@ private slots:
 
     void on_actionImport_Network_triggered();
 
-    void on_pushButton_singleShot_clicked();
-
 private:
     void timerEvent(QTimerEvent *);
 
