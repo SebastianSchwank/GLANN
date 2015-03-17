@@ -10,11 +10,13 @@ varying vec2 v_texcoord;
 
 uniform sampler2D WeightsLayer;
 uniform sampler2D ActivationLayer;
+uniform sampler2D MomentumTerm;
 uniform int size;
 uniform int numLayers;
 
 uniform float learningRate;
 uniform float steepness;
+uniform float moment;
 
 const float pi = 3.14159265359;
 
@@ -62,8 +64,9 @@ void main()
     vec4 imagePixel = vec4(1.0,1.0,1.0,1.0);
 
     //Propagate Backwards (=2), Adjust WeightsLayer (=3)
-    if(shaderMode == 2 || shaderMode == 3){
+    if(shaderMode == 2 || shaderMode == 3 || shaderMode == 4){
 
+        //Bacikpropagate error
         if(shaderMode == 2){
             //Performence lag here !
             float outPrevLayer = unpack(texture2D(ActivationLayer,vec2(v_texcoord.x,-1.0/(2.0*(float(size)+1.0)))));
@@ -78,16 +81,33 @@ void main()
             }
             imagePixel = pack(unmap(sumPixelX*outPrevLayer*(1.0-outPrevLayer)));
 
-        }else{
-
+        }
+        //calc new Weights
+        if(shaderMode == 3){
             float weight = map(unpack(texture2D(WeightsLayer,v_texcoord)));
+            float MomentumTerm = map(unpack(texture2D(MomentumTerm,v_texcoord)));
+
             //Adding tension term here to keep the weight down becs. it's clamped between -1...1
             weight = weight * (1.0- abs(weight*weight*weight*weight*weight*weight));
-            //----------------------------------------------------------------------------------
+
             float inputN = unpack(texture2D(ActivationLayer,vec2(v_texcoord.x,-1.0/(2.0*(float(size)+1.0)))));
             float errorTerm = map(unpack(texture2D(WeightsLayer,vec2(v_texcoord.y*(float(size)/float(size+1)),(2.0*float(size+1) + 1.0)/(2.0*(float(size)+1.0))))));
 
-            imagePixel = pack(clip(unmap(weight + errorTerm * mulLearningRate * inputN)));
+            imagePixel = pack(clip(unmap(weight + errorTerm * mulLearningRate * inputN + moment * MomentumTerm)));
+
+        }
+        //reCalc only Momentum
+        if(shaderMode == 4){
+
+            //float weight = map(unpack(texture2D(WeightsLayer,v_texcoord)));
+            //Adding tension term here to keep the weight down becs. it's clamped between -1...1
+            //weight = weight * (1.0- abs(weight*weight*weight*weight*weight*weight));
+            //----------------------------------------------------------------------------------
+            float inputN = unpack(texture2D(ActivationLayer,vec2(v_texcoord.x,-1.0/(2.0*(float(size)+1.0)))));
+            float errorTerm = map(unpack(texture2D(WeightsLayer,vec2(v_texcoord.y*(float(size)/float(size+1)),(2.0*float(size+1) + 1.0)/(2.0*(float(size)+1.0))))));
+            float MomentumTerm = map(unpack(texture2D(MomentumTerm,v_texcoord)));
+
+            imagePixel = pack(clip(unmap(errorTerm * mulLearningRate * inputN + moment * MomentumTerm)));
             //imagePixel = pack(unmap(errorTerm));
             //imagePixel = texelFetch(WeightsLayer,vec2(v_texcoord.x * size, v_texcoord.y * (size+1)),vec2(size,size+1));
         }

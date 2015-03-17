@@ -49,6 +49,7 @@ public:
 
     void setLearningrate(float value);
     void setSteepness(float value);
+    void setMomentum(float value);
 
 protected:
 
@@ -75,10 +76,12 @@ private:
     bool loadedImageAvailable;
 
     QImage *NetworkWeights;
+    QImage *MomentumTerm;
     QImage *NetworkActivation;
 
     GLuint pixelsNetworkWeights;
     GLuint pixelsNetworkActivation;
+    GLuint pixelsMomentumTerm;
 
     unsigned int numLayers;
     unsigned int size;

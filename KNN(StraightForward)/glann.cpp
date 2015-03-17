@@ -30,6 +30,10 @@ void GLANN::setSteepness(float value){
     program.setUniformValue("steepness",value);
 }
 
+void GLANN::setMomentum(float value){
+    program.setUniformValue("moment",value);
+}
+
 void GLANN::replaceWeights(QImage newWeights,unsigned int layerSize, unsigned int numLayers){
     this->size = layerSize;
     this->numLayers = numLayers;
@@ -149,6 +153,40 @@ QImage GLANN::errorBackProagation(QVector<float> error){
         QImage layerNetwWeights = NetworkWeights->copy(0,layer*(size+1)+1,size,size+1);
         pixelsNetworkWeights = QGLWidget::bindTexture(layerNetwWeights);
 
+        QImage layerWeightsMoment = MomentumTerm->copy(0,layer*(size+1)+1,size,size+1);
+        pixelsMomentumTerm = QGLWidget::bindTexture(layerWeightsMoment);
+
+        // Tell OpenGL which VBOs to use
+        glBindBuffer(GL_ARRAY_BUFFER, vboId0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboId1);
+
+        //Set Programm to calc the Momentum
+        program.setUniformValue("shaderMode",4);
+
+        fbo->bind();
+
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+            //Bind current Weights
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, pixelsNetworkWeights);
+
+            //Bind current Activation
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, pixelsNetworkActivation);
+
+            //Bind current Activation
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, pixelsMomentumTerm);
+
+            // Draw cube geometry using indices from VBO 1
+            glDrawElements(GL_TRIANGLE_STRIP, 5, GL_UNSIGNED_SHORT, 0);
+
+        fbo->release();
+
+        //To copy the sum activation into the Network Activation "Buffer"
+        QImage layerDeltaWeights = fbo->toImage();
+
 
         //Set Programm to correcting the wheights (have to add the momentum Term later)
         program.setUniformValue("shaderMode",3);
@@ -165,24 +203,23 @@ QImage GLANN::errorBackProagation(QVector<float> error){
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, pixelsNetworkActivation);
 
+            //Bind current Activation
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, pixelsMomentumTerm);
+
             // Draw cube geometry using indices from VBO 1
             glDrawElements(GL_TRIANGLE_STRIP, 5, GL_UNSIGNED_SHORT, 0);
 
         fbo->release();
 
         //To copy the sum activation into the Network Activation "Buffer"
-        QImage layerCorrNetwWeights = fbo->toImage();
-
+        QImage layerNewNetwWeights = fbo->toImage();
 
         //Set program to fbo render mode to
         //Propagate error backwards through the Layer
         program.setUniformValue("shaderMode",2);
 
         fbo->bind();
-
-            // Tell OpenGL which VBOs to use
-            glBindBuffer(GL_ARRAY_BUFFER, vboId0);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboId1);
 
             //Bind current Weights
             glActiveTexture(GL_TEXTURE0);
@@ -191,6 +228,10 @@ QImage GLANN::errorBackProagation(QVector<float> error){
             //Bind current Activation
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, pixelsNetworkActivation);
+
+            //Bind current Activation
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, pixelsMomentumTerm);
 
             // Draw cube geometry using indices from VBO 1
             glDrawElements(GL_TRIANGLE_STRIP, 5, GL_UNSIGNED_SHORT, 0);
@@ -206,10 +247,15 @@ QImage GLANN::errorBackProagation(QVector<float> error){
         //Delete Network's Activation Buffer
         glDeleteTextures(1,&pixelsNetworkWeights);
 
+        //Delete Momentum
+        glDeleteTextures(1,&pixelsMomentumTerm);
 
-        //Now copy corrected Weights
+        //Now copy the current Moment
         QPoint destPos1 = QPoint(0, layer*(size+1)+1);
-        copyImageSection(destPos1,NetworkWeights,layerCorrNetwWeights);
+        copyImageSection(destPos1,MomentumTerm,layerDeltaWeights);
+
+        //Here we copy the new weights to Image for the next iteration
+        copyImageSection(destPos1,NetworkWeights,layerNewNetwWeights);
 
         //After that merge Image to Activation Buffer
         QPoint destPos2 = QPoint(0, layer*(size+1));
@@ -493,6 +539,9 @@ void GLANN::initTextures(){
         //Initalize Random Weights
         NetworkWeights = new Playground(size,size*numLayers+numLayers+1);
     }
+    //Initalise the Momentum to zero
+    MomentumTerm = new QImage(size,size*numLayers+numLayers+1,QImage::Format_ARGB32);
+    MomentumTerm->fill(qRgba(126,126,126,126));
 
     //Initalize NetworkActivation + NeuronActivationSum + InputLayer (+1)
     NetworkActivation = new QImage(size,size*numLayers+numLayers+1,QImage::Format_ARGB32);
@@ -545,6 +594,9 @@ void GLANN::initShader(){
 
     // Use texture unit 1
     program.setUniformValue("ActivationLayer",1);
+
+    // Use texture unit 2
+    program.setUniformValue("MomentumTerm",2);
 
     //width
     program.setUniformValue("size", size);

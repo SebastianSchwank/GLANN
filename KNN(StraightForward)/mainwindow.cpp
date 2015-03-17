@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    mSize = 64;
+    mSize = 32;
     mLayers = 6;
 
     knn = new GLANN(mSize,mLayers);
@@ -98,16 +98,16 @@ void MainWindow::doCalculations(){
     /*------------------------------------------*/
     QVector<float> input;
     for(int i = 0; i < mSize-1; i++){
-        input.append((1.0+sin((mFrameCounter % 50)/10.0*(i/(mSize-1.0f))*2*3.14159265359))/2.0);
+        input.append((1.0+sin((mFrameCounter % 25)/10.0*(i/(mSize-1.0f))*2*3.14159265359))/2.0);
     }
 
     QVector<float> out = knn->propagateForward(input);
 
     QVector<float> target;
     for(int i = 0; i < mSize-1; i++)
-        target.append(0.0);
+        target.append(0.5);
 
-    target[(mFrameCounter % 50)+(mSize-1)/10] = 0.9999;
+    target[(mFrameCounter % 25)+(mSize-1)/10] = 0.9999;
 
     float erroQuad = 0.0;
     QVector<float> error;
@@ -138,8 +138,8 @@ void MainWindow::doCalculations(){
     accError += erroQuad;
 
     //Plot the current Glob Error
-    if(mFrameCounter % 50 == 0 ){
-        errorGraph->addLine(mFrameCounter/100-1,-lastError,mFrameCounter/100,-accError);
+    if(mFrameCounter % 25 == 0 ){
+        errorGraph->addLine(mFrameCounter/25-1,-lastError,mFrameCounter/25,-accError);
         lastError = accError;
         accError = 0;
     }
@@ -177,6 +177,7 @@ void MainWindow::on_pushButton_StartStop_clicked()
     // ------------ !!!
     knn->setLearningrate(0.35);
     knn->setSteepness(1.1);
+    knn->setMomentum(0.2);
 
     if(timer.isActive()){
         // Use QBasicTimer because its faster than QTimer
