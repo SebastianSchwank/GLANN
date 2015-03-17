@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     mSize = 32;
-    mLayers = 6;
+    mLayers = 1;
 
     knn = new GLANN(mSize,mLayers);
 
@@ -175,7 +175,7 @@ void MainWindow::on_pushButton_importTarget_clicked()
 void MainWindow::on_pushButton_StartStop_clicked()
 {
     // ------------ !!!
-    knn->setLearningrate(0.35);
+    knn->setLearningrate(0.90);
     knn->setSteepness(1.1);
     knn->setMomentum(0.2);
 
@@ -241,10 +241,8 @@ void MainWindow::on_pushButton_singleShot_clicked()
 {
     QVector<float> input;
     for(int i = 0; i < mSize-1; i++){
-        input.append(0.0);
+        input.append((1.0+sin(5.0*DiracPos01*(i/(mSize-1.0f))*3.14159265359))/2.0);
     }
-    input[50] = 1.0;
-    input[120] = 1.0;
 
     QVector<float> out = knn->propagateForward(input);
 
@@ -261,4 +259,9 @@ void MainWindow::on_pushButton_singleShot_clicked()
     }
 
 
+}
+
+void MainWindow::on_horizontalSlider_sliderMoved(int position)
+{
+    DiracPos01 = 1.0f*position/100.0f;
 }

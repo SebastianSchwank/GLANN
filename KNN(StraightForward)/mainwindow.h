@@ -46,6 +46,8 @@ private slots:
 
     void on_pushButton_singleShot_clicked();
 
+    void on_horizontalSlider_sliderMoved(int position);
+
 private:
     void timerEvent(QTimerEvent *);
 
@@ -62,6 +64,7 @@ private:
     QGraphicsScene *errorGraph;
     unsigned long int mFrameCounter;
     float lastError,accError;
+    float DiracPos01;
 
     QImage *currRenderedImage;
     QImage netWeights;
