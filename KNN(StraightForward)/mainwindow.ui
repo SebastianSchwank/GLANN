@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>613</width>
-    <height>618</height>
+    <height>644</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,7 +36,7 @@
              <x>0</x>
              <y>0</y>
              <width>561</width>
-             <height>420</height>
+             <height>446</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -258,13 +258,6 @@
            </widget>
           </item>
          </layout>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_singleShot">
-          <property name="text">
-           <string>Single Shot Propagation</string>
-          </property>
-         </widget>
         </item>
        </layout>
       </widget>

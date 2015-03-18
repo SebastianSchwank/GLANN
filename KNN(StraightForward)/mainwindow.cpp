@@ -175,7 +175,7 @@ void MainWindow::on_pushButton_importTarget_clicked()
 void MainWindow::on_pushButton_StartStop_clicked()
 {
     // ------------ !!!
-    knn->setLearningrate(0.90);
+    knn->setLearningrate(1.10);
     knn->setSteepness(1.1);
     knn->setMomentum(0.2);
 
@@ -237,11 +237,13 @@ void MainWindow::on_actionImport_Network_triggered()
     }
 }
 
-void MainWindow::on_pushButton_singleShot_clicked()
+void MainWindow::on_horizontalSlider_valueChanged(int value)
 {
+    float FrequencySin = 1.0f*value/100.0f;
+
     QVector<float> input;
     for(int i = 0; i < mSize-1; i++){
-        input.append((1.0+sin(5.0*DiracPos01*(i/(mSize-1.0f))*3.14159265359))/2.0);
+        input.append((1.0+sin(5.0*FrequencySin*((1.0f*i)/(mSize-1.0f))*3.14159265359))/2.0);
     }
 
     QVector<float> out = knn->propagateForward(input);
@@ -257,11 +259,4 @@ void MainWindow::on_pushButton_singleShot_clicked()
     for(int i = 1; i < mSize-1; i++){
         outPlot->addLine(i-1,-out[i-1]*scaler,i,-out[i]*scaler);
     }
-
-
-}
-
-void MainWindow::on_horizontalSlider_sliderMoved(int position)
-{
-    DiracPos01 = 1.0f*position/100.0f;
 }
